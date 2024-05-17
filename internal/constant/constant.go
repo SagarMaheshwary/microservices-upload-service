@@ -10,3 +10,11 @@ const (
 	MessageNotFound            = "Resource Not Found"
 	MessageInternalServerError = "Internal Server Error"
 )
+
+const (
+	QueueEncodeService = "EncodeService"
+)
+
+const (
+	MessageTypeEncodeUploadedVideo = "EncodeUploadedVideo"
+)

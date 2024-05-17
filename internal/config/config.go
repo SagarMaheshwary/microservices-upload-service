@@ -15,6 +15,7 @@ var conf *Config
 type Config struct {
 	GRPCServer *grpcServer
 	S3         *s3
+	AMQP       *amqp
 }
 
 type grpcServer struct {
@@ -29,11 +30,18 @@ type s3 struct {
 	SecretKey string
 }
 
+type amqp struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+}
+
 func Init() {
 	envPath := path.Join(helper.RootDir(), "..", ".env")
 
 	if err := env.Load(envPath); err != nil {
-		log.Fatal("Failed to load .env %q: %v", envPath, err)
+		log.Fatal("Failed to load %q: %v", envPath, err)
 	}
 
 	log.Info("Loaded %q", envPath)
@@ -42,6 +50,12 @@ func Init() {
 
 	if err != nil {
 		log.Error("Invalid GRPC_PORT value %v", err)
+	}
+
+	amqpPort, err := strconv.Atoi(Getenv("AMQP_PORT", "5672"))
+
+	if err != nil {
+		log.Error("Invalid AMQP_PORT value %v", err)
 	}
 
 	conf = &Config{
@@ -55,6 +69,12 @@ func Init() {
 			AccessKey: Getenv("AWS_S3_ACCESS_KEY", ""),
 			SecretKey: Getenv("AWS_S3_SECRET_KEY", ""),
 		},
+		AMQP: &amqp{
+			Host:     Getenv("AMQP_HOST", "localhost"),
+			Port:     amqpPort,
+			Username: Getenv("AMQP_USERNAME", "guest"),
+			Password: Getenv("AMQP_PASSWORD", "guest"),
+		},
 	}
 }
 
@@ -64,6 +84,10 @@ func GetgrpcServer() *grpcServer {
 
 func GetS3() *s3 {
 	return conf.S3
+}
+
+func Getamqp() *amqp {
+	return conf.AMQP
 }
 
 func Getenv(key string, defaultVal string) string {

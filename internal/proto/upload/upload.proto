@@ -14,11 +14,17 @@ message CreatePresignedUrlRequest {
 }
 
 message CreatePresignedUrlResponse {
-  string url = 1;
+  string message = 1;
+  CreatePresignedUrlResponseData data = 2;
+}
+
+message CreatePresignedUrlResponseData {
+  string upload_id = 1;
+  string url = 2;
 }
 
 message UploadedWebhookRequest {
-  string url = 1;
+  string upload_id = 1;
   string title = 2;
   string description = 3;
 }

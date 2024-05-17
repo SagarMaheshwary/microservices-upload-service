@@ -63,7 +63,8 @@ type CreatePresignedUrlResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	Message string                          `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Data    *CreatePresignedUrlResponseData `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 }
 
 func (x *CreatePresignedUrlResponse) Reset() {
@@ -98,7 +99,69 @@ func (*CreatePresignedUrlResponse) Descriptor() ([]byte, []int) {
 	return file_internal_proto_upload_upload_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CreatePresignedUrlResponse) GetUrl() string {
+func (x *CreatePresignedUrlResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *CreatePresignedUrlResponse) GetData() *CreatePresignedUrlResponseData {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+type CreatePresignedUrlResponseData struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UploadId string `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
+	Url      string `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
+}
+
+func (x *CreatePresignedUrlResponseData) Reset() {
+	*x = CreatePresignedUrlResponseData{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_internal_proto_upload_upload_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreatePresignedUrlResponseData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreatePresignedUrlResponseData) ProtoMessage() {}
+
+func (x *CreatePresignedUrlResponseData) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_proto_upload_upload_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreatePresignedUrlResponseData.ProtoReflect.Descriptor instead.
+func (*CreatePresignedUrlResponseData) Descriptor() ([]byte, []int) {
+	return file_internal_proto_upload_upload_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *CreatePresignedUrlResponseData) GetUploadId() string {
+	if x != nil {
+		return x.UploadId
+	}
+	return ""
+}
+
+func (x *CreatePresignedUrlResponseData) GetUrl() string {
 	if x != nil {
 		return x.Url
 	}
@@ -110,7 +173,7 @@ type UploadedWebhookRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url         string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	UploadId    string `protobuf:"bytes,1,opt,name=upload_id,json=uploadId,proto3" json:"upload_id,omitempty"`
 	Title       string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 }
@@ -118,7 +181,7 @@ type UploadedWebhookRequest struct {
 func (x *UploadedWebhookRequest) Reset() {
 	*x = UploadedWebhookRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_internal_proto_upload_upload_proto_msgTypes[2]
+		mi := &file_internal_proto_upload_upload_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -131,7 +194,7 @@ func (x *UploadedWebhookRequest) String() string {
 func (*UploadedWebhookRequest) ProtoMessage() {}
 
 func (x *UploadedWebhookRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_upload_upload_proto_msgTypes[2]
+	mi := &file_internal_proto_upload_upload_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -144,12 +207,12 @@ func (x *UploadedWebhookRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadedWebhookRequest.ProtoReflect.Descriptor instead.
 func (*UploadedWebhookRequest) Descriptor() ([]byte, []int) {
-	return file_internal_proto_upload_upload_proto_rawDescGZIP(), []int{2}
+	return file_internal_proto_upload_upload_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *UploadedWebhookRequest) GetUrl() string {
+func (x *UploadedWebhookRequest) GetUploadId() string {
 	if x != nil {
-		return x.Url
+		return x.UploadId
 	}
 	return ""
 }
@@ -180,7 +243,7 @@ type UploadedWebhookResponse struct {
 func (x *UploadedWebhookResponse) Reset() {
 	*x = UploadedWebhookResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_internal_proto_upload_upload_proto_msgTypes[3]
+		mi := &file_internal_proto_upload_upload_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -193,7 +256,7 @@ func (x *UploadedWebhookResponse) String() string {
 func (*UploadedWebhookResponse) ProtoMessage() {}
 
 func (x *UploadedWebhookResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_upload_upload_proto_msgTypes[3]
+	mi := &file_internal_proto_upload_upload_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -206,7 +269,7 @@ func (x *UploadedWebhookResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadedWebhookResponse.ProtoReflect.Descriptor instead.
 func (*UploadedWebhookResponse) Descriptor() ([]byte, []int) {
-	return file_internal_proto_upload_upload_proto_rawDescGZIP(), []int{3}
+	return file_internal_proto_upload_upload_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *UploadedWebhookResponse) GetMessage() string {
@@ -232,7 +295,7 @@ type UploadedWebhookResponseData struct {
 func (x *UploadedWebhookResponseData) Reset() {
 	*x = UploadedWebhookResponseData{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_internal_proto_upload_upload_proto_msgTypes[4]
+		mi := &file_internal_proto_upload_upload_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -245,7 +308,7 @@ func (x *UploadedWebhookResponseData) String() string {
 func (*UploadedWebhookResponseData) ProtoMessage() {}
 
 func (x *UploadedWebhookResponseData) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_proto_upload_upload_proto_msgTypes[4]
+	mi := &file_internal_proto_upload_upload_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -258,7 +321,7 @@ func (x *UploadedWebhookResponseData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadedWebhookResponseData.ProtoReflect.Descriptor instead.
 func (*UploadedWebhookResponseData) Descriptor() ([]byte, []int) {
-	return file_internal_proto_upload_upload_proto_rawDescGZIP(), []int{4}
+	return file_internal_proto_upload_upload_proto_rawDescGZIP(), []int{5}
 }
 
 var File_internal_proto_upload_upload_proto protoreflect.FileDescriptor
@@ -268,13 +331,23 @@ var file_internal_proto_upload_upload_proto_rawDesc = []byte{
 	0x2f, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x2f, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x70,
 	0x72, 0x6f, 0x74, 0x6f, 0x12, 0x06, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x22, 0x1b, 0x0a, 0x19,
 	0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50, 0x72, 0x65, 0x73, 0x69, 0x67, 0x6e, 0x65, 0x64, 0x55,
-	0x72, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x2e, 0x0a, 0x1a, 0x43, 0x72, 0x65,
+	0x72, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x72, 0x0a, 0x1a, 0x43, 0x72, 0x65,
 	0x61, 0x74, 0x65, 0x50, 0x72, 0x65, 0x73, 0x69, 0x67, 0x6e, 0x65, 0x64, 0x55, 0x72, 0x6c, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x22, 0x62, 0x0a, 0x16, 0x55, 0x70, 0x6c,
-	0x6f, 0x61, 0x64, 0x65, 0x64, 0x57, 0x65, 0x62, 0x68, 0x6f, 0x6f, 0x6b, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x18, 0x02,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61,
+	0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67,
+	0x65, 0x12, 0x3a, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x26, 0x2e, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50,
+	0x72, 0x65, 0x73, 0x69, 0x67, 0x6e, 0x65, 0x64, 0x55, 0x72, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x44, 0x61, 0x74, 0x61, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x22, 0x4f, 0x0a,
+	0x1e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50, 0x72, 0x65, 0x73, 0x69, 0x67, 0x6e, 0x65, 0x64,
+	0x55, 0x72, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x44, 0x61, 0x74, 0x61, 0x12,
+	0x1b, 0x0a, 0x09, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x08, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x49, 0x64, 0x12, 0x10, 0x0a, 0x03,
+	0x75, 0x72, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x22, 0x6d,
+	0x0a, 0x16, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x57, 0x65, 0x62, 0x68, 0x6f, 0x6f,
+	0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1b, 0x0a, 0x09, 0x75, 0x70, 0x6c, 0x6f,
+	0x61, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x70, 0x6c,
+	0x6f, 0x61, 0x64, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x18, 0x02,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x69, 0x74, 0x6c, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x64,
 	0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09,
 	0x52, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x6c, 0x0a,
@@ -318,25 +391,27 @@ func file_internal_proto_upload_upload_proto_rawDescGZIP() []byte {
 	return file_internal_proto_upload_upload_proto_rawDescData
 }
 
-var file_internal_proto_upload_upload_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_internal_proto_upload_upload_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_internal_proto_upload_upload_proto_goTypes = []interface{}{
-	(*CreatePresignedUrlRequest)(nil),   // 0: upload.CreatePresignedUrlRequest
-	(*CreatePresignedUrlResponse)(nil),  // 1: upload.CreatePresignedUrlResponse
-	(*UploadedWebhookRequest)(nil),      // 2: upload.UploadedWebhookRequest
-	(*UploadedWebhookResponse)(nil),     // 3: upload.UploadedWebhookResponse
-	(*UploadedWebhookResponseData)(nil), // 4: upload.UploadedWebhookResponseData
+	(*CreatePresignedUrlRequest)(nil),      // 0: upload.CreatePresignedUrlRequest
+	(*CreatePresignedUrlResponse)(nil),     // 1: upload.CreatePresignedUrlResponse
+	(*CreatePresignedUrlResponseData)(nil), // 2: upload.CreatePresignedUrlResponseData
+	(*UploadedWebhookRequest)(nil),         // 3: upload.UploadedWebhookRequest
+	(*UploadedWebhookResponse)(nil),        // 4: upload.UploadedWebhookResponse
+	(*UploadedWebhookResponseData)(nil),    // 5: upload.UploadedWebhookResponseData
 }
 var file_internal_proto_upload_upload_proto_depIdxs = []int32{
-	4, // 0: upload.UploadedWebhookResponse.data:type_name -> upload.UploadedWebhookResponseData
-	0, // 1: upload.Upload.CreatePresignedUrl:input_type -> upload.CreatePresignedUrlRequest
-	2, // 2: upload.Upload.UploadedWebhook:input_type -> upload.UploadedWebhookRequest
-	1, // 3: upload.Upload.CreatePresignedUrl:output_type -> upload.CreatePresignedUrlResponse
-	3, // 4: upload.Upload.UploadedWebhook:output_type -> upload.UploadedWebhookResponse
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	2, // 0: upload.CreatePresignedUrlResponse.data:type_name -> upload.CreatePresignedUrlResponseData
+	5, // 1: upload.UploadedWebhookResponse.data:type_name -> upload.UploadedWebhookResponseData
+	0, // 2: upload.Upload.CreatePresignedUrl:input_type -> upload.CreatePresignedUrlRequest
+	3, // 3: upload.Upload.UploadedWebhook:input_type -> upload.UploadedWebhookRequest
+	1, // 4: upload.Upload.CreatePresignedUrl:output_type -> upload.CreatePresignedUrlResponse
+	4, // 5: upload.Upload.UploadedWebhook:output_type -> upload.UploadedWebhookResponse
+	4, // [4:6] is the sub-list for method output_type
+	2, // [2:4] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_internal_proto_upload_upload_proto_init() }
@@ -370,7 +445,7 @@ func file_internal_proto_upload_upload_proto_init() {
 			}
 		}
 		file_internal_proto_upload_upload_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UploadedWebhookRequest); i {
+			switch v := v.(*CreatePresignedUrlResponseData); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -382,7 +457,7 @@ func file_internal_proto_upload_upload_proto_init() {
 			}
 		}
 		file_internal_proto_upload_upload_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UploadedWebhookResponse); i {
+			switch v := v.(*UploadedWebhookRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -394,6 +469,18 @@ func file_internal_proto_upload_upload_proto_init() {
 			}
 		}
 		file_internal_proto_upload_upload_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UploadedWebhookResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_internal_proto_upload_upload_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UploadedWebhookResponseData); i {
 			case 0:
 				return &v.state
@@ -412,7 +499,7 @@ func file_internal_proto_upload_upload_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_internal_proto_upload_upload_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
