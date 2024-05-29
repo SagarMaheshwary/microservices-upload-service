@@ -18,3 +18,14 @@ const (
 const (
 	MessageTypeEncodeUploadedVideo = "EncodeUploadedVideo"
 )
+
+const (
+	ContentTypeJSON = "application/json"
+)
+
+const (
+	ProtocolTCP  = "tcp"
+	ProtocolAMQP = "amqp"
+)
+
+const RawVideosDirectory = "raw-videos"

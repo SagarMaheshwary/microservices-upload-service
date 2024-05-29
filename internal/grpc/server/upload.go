@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	awssdk "github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/google/uuid"
-	"github.com/sagarmaheshwary/microservices-upload-service/internal/config"
 	cons "github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
-	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/amqp"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/aws"
+	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/broker"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/log"
+	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/publisher"
 	pb "github.com/sagarmaheshwary/microservices-upload-service/internal/proto/upload"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -23,24 +21,8 @@ type uploadServer struct {
 }
 
 func (u *uploadServer) CreatePresignedUrl(ctx context.Context, data *pb.CreatePresignedUrlRequest) (*pb.CreatePresignedUrlResponse, error) {
-	c := config.GetS3()
-
-	svc, err := aws.NewS3Session()
-
-	if err != nil {
-		log.Error("gRPC.CreatePresignedUrl unable to create s3 session: %v", err)
-
-		return nil, status.Errorf(codes.Internal, cons.MessageInternalServerError)
-	}
-
-	uploadId := fmt.Sprintf("video-%s", uuid.New().String())
-
-	req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
-		Bucket: awssdk.String(c.Bucket),
-		Key:    awssdk.String(uploadId),
-	})
-
-	url, err := req.Presign(time.Duration(15 * time.Minute)) //@TODO: add timeout to config
+	uploadId := fmt.Sprintf("%s/%s", cons.RawVideosDirectory, uuid.New().String())
+	url, err := aws.CreatePresignedUploadUrl(uploadId)
 
 	if err != nil {
 		log.Error("gRPC.CreatePresignedUrl unable to create presigned url from request: %v", err)
@@ -65,15 +47,17 @@ func (u *uploadServer) UploadedWebhook(ctx context.Context, data *pb.UploadedWeb
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		PublishedAt string `json:"published_at"`
+		UserId      int    `json:"user_id"`
 	}
 
-	err := amqp.PublishMessage(cons.QueueEncodeService, &amqp.MessageType{
+	err := publisher.P.Publish(cons.QueueEncodeService, &broker.MessageType{
 		Key: cons.MessageTypeEncodeUploadedVideo,
 		Data: &EncodeUploadedVideo{
 			UploadId:    data.UploadId,
 			Title:       data.Title,
 			Description: data.Description,
 			PublishedAt: time.Now().Format(time.RFC3339),
+			UserId:      1, //@TODO: send current user id
 		},
 	})
 

@@ -4,6 +4,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"time"
 
 	"github.com/gofor-little/env"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/helper"
@@ -24,17 +25,19 @@ type grpcServer struct {
 }
 
 type s3 struct {
-	Bucket    string
-	Region    string
-	AccessKey string
-	SecretKey string
+	Bucket             string
+	Region             string
+	AccessKey          string
+	SecretKey          string
+	PresignedUrlExpiry int
 }
 
 type amqp struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
+	Host           string
+	Port           int
+	Username       string
+	Password       string
+	PublishTimeout time.Duration
 }
 
 func Init() {
@@ -58,22 +61,36 @@ func Init() {
 		log.Error("Invalid AMQP_PORT value %v", err)
 	}
 
+	amqpPublishTimeout, err := strconv.Atoi(Getenv("AMQP_PUBLISH_TIMEOUT_SECONDS", "5"))
+
+	if err != nil {
+		log.Error("Invalid AMQP_PORT value %v", err)
+	}
+
+	s3UrlExpiry, err := strconv.Atoi(Getenv("AWS_S3_PRESIGNED_URL_EXPIRY", "0"))
+
+	if err != nil {
+		log.Error("Invalid AWS_S3_PRESIGNED_URL_EXPIRY value %v", err)
+	}
+
 	conf = &Config{
 		GRPCServer: &grpcServer{
 			Host: Getenv("GRPC_HOST", "localhost"),
 			Port: port,
 		},
 		S3: &s3{
-			Bucket:    Getenv("AWS_S3_BUCKET", ""),
-			Region:    Getenv("AWS_S3_REGION", ""),
-			AccessKey: Getenv("AWS_S3_ACCESS_KEY", ""),
-			SecretKey: Getenv("AWS_S3_SECRET_KEY", ""),
+			Bucket:             Getenv("AWS_S3_BUCKET", ""),
+			Region:             Getenv("AWS_S3_REGION", ""),
+			AccessKey:          Getenv("AWS_S3_ACCESS_KEY", ""),
+			SecretKey:          Getenv("AWS_S3_SECRET_KEY", ""),
+			PresignedUrlExpiry: s3UrlExpiry,
 		},
 		AMQP: &amqp{
-			Host:     Getenv("AMQP_HOST", "localhost"),
-			Port:     amqpPort,
-			Username: Getenv("AMQP_USERNAME", "guest"),
-			Password: Getenv("AMQP_PASSWORD", "guest"),
+			Host:           Getenv("AMQP_HOST", "localhost"),
+			Port:           amqpPort,
+			Username:       Getenv("AMQP_USERNAME", "guest"),
+			Password:       Getenv("AMQP_PASSWORD", "guest"),
+			PublishTimeout: time.Duration(amqpPublishTimeout) * time.Second,
 		},
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/config"
+	cons "github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/log"
 	pb "github.com/sagarmaheshwary/microservices-upload-service/internal/proto/upload"
 	"google.golang.org/grpc"
@@ -15,7 +16,7 @@ func Connect() {
 
 	address := fmt.Sprintf("%s:%d", c.Host, c.Port)
 
-	listener, err := net.Listen("tcp", address)
+	listener, err := net.Listen(cons.ProtocolTCP, address)
 
 	if err != nil {
 		log.Fatal("Failed to create tcp listner on %q: %v", address, err)
