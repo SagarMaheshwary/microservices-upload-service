@@ -21,8 +21,9 @@ type uploadServer struct {
 }
 
 func (u *uploadServer) CreatePresignedUrl(ctx context.Context, data *pb.CreatePresignedUrlRequest) (*pb.CreatePresignedUrlResponse, error) {
-	uploadId := fmt.Sprintf("%s/%s", cons.RawVideosDirectory, uuid.New().String())
-	url, err := aws.CreatePresignedUploadUrl(uploadId)
+	uploadId := uuid.New().String()
+
+	url, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", cons.RawVideosDirectory, uploadId))
 
 	if err != nil {
 		log.Error("gRPC.CreatePresignedUrl unable to create presigned url from request: %v", err)
