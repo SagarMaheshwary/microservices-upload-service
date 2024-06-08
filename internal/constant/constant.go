@@ -32,4 +32,7 @@ const (
 	HeaderUserId = "x-user-id"
 )
 
-const RawVideosDirectory = "raw-videos"
+const (
+	S3RawVideosDirectory  = "raw-videos"
+	S3ThumbnailsDirectory = "thumbnails"
+)

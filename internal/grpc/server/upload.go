@@ -11,7 +11,6 @@ import (
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/helper"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/aws"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/broker"
-	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/log"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/publisher"
 	pb "github.com/sagarmaheshwary/microservices-upload-service/internal/proto/upload"
 	"google.golang.org/grpc/codes"
@@ -24,21 +23,28 @@ type uploadServer struct {
 }
 
 func (u *uploadServer) CreatePresignedUrl(ctx context.Context, data *pb.CreatePresignedUrlRequest) (*pb.CreatePresignedUrlResponse, error) {
-	uploadId := uuid.New().String()
+	videoId := uuid.New().String()
+	thumbnailId := uuid.New().String()
 
-	url, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", cons.RawVideosDirectory, uploadId))
+	videoUrl, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", cons.S3RawVideosDirectory, videoId))
 
 	if err != nil {
-		log.Error("gRPC.CreatePresignedUrl unable to create presigned url from request: %v", err)
+		return nil, status.Errorf(codes.Internal, cons.MessageInternalServerError)
+	}
 
+	thumbnailUrl, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", cons.S3ThumbnailsDirectory, thumbnailId))
+
+	if err != nil {
 		return nil, status.Errorf(codes.Internal, cons.MessageInternalServerError)
 	}
 
 	response := &pb.CreatePresignedUrlResponse{
 		Message: cons.MessageOK,
 		Data: &pb.CreatePresignedUrlResponseData{
-			UploadId: uploadId,
-			Url:      url,
+			VideoId:      videoId,
+			VideoUrl:     videoUrl,
+			ThumbnailId:  thumbnailId,
+			ThumbnailUrl: thumbnailUrl,
 		},
 	}
 
@@ -57,7 +63,8 @@ func (u *uploadServer) UploadedWebhook(ctx context.Context, data *pb.UploadedWeb
 	userId, _ := strconv.Atoi(id)
 
 	type EncodeUploadedVideo struct {
-		UploadId    string `json:"upload_id"`
+		VideoId     string `json:"video_id"`
+		ThumbnailId string `json:"thumbnail_id"`
 		Title       string `json:"title"`
 		Description string `json:"description"`
 		PublishedAt string `json:"published_at"`
@@ -67,7 +74,8 @@ func (u *uploadServer) UploadedWebhook(ctx context.Context, data *pb.UploadedWeb
 	err := publisher.P.Publish(cons.QueueEncodeService, &broker.MessageType{
 		Key: cons.MessageTypeEncodeUploadedVideo,
 		Data: &EncodeUploadedVideo{
-			UploadId:    data.UploadId,
+			VideoId:     data.VideoId,
+			ThumbnailId: data.ThumbnailId,
 			Title:       data.Title,
 			Description: data.Description,
 			PublishedAt: time.Now().Format(time.RFC3339),

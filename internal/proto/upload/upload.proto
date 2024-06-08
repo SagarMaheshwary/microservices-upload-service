@@ -6,7 +6,7 @@ option go_package = "github.com/SagarMaheshwary/microservices-upload-service/pro
 
 service Upload {
   rpc CreatePresignedUrl(CreatePresignedUrlRequest) returns (CreatePresignedUrlResponse) {};
-  rpc UploadedWebhook(UploadedWebhookRequest) returns (UploadedWebhookResponse) {}
+  rpc UploadedWebhook(UploadedWebhookRequest) returns (UploadedWebhookResponse) {};
 }
 
 message CreatePresignedUrlRequest {
@@ -19,14 +19,17 @@ message CreatePresignedUrlResponse {
 }
 
 message CreatePresignedUrlResponseData {
-  string upload_id = 1;
-  string url = 2;
+  string video_id = 1;
+  string thumbnail_id = 2;
+  string video_url = 3;
+  string thumbnail_url = 4;
 }
 
 message UploadedWebhookRequest {
-  string upload_id = 1;
-  string title = 2;
-  string description = 3;
+  string video_id = 1;
+  string thumbnail_id = 2;
+  string title = 3;
+  string description = 4;
 }
 
 message UploadedWebhookResponse {
