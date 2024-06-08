@@ -3,16 +3,19 @@ package server
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
 	cons "github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
+	"github.com/sagarmaheshwary/microservices-upload-service/internal/helper"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/aws"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/broker"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/log"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/publisher"
 	pb "github.com/sagarmaheshwary/microservices-upload-service/internal/proto/upload"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -43,6 +46,16 @@ func (u *uploadServer) CreatePresignedUrl(ctx context.Context, data *pb.CreatePr
 }
 
 func (u *uploadServer) UploadedWebhook(ctx context.Context, data *pb.UploadedWebhookRequest) (*pb.UploadedWebhookResponse, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+
+	id, exists := helper.GetFromMetadata(md, cons.HeaderUserId)
+
+	if !exists {
+		return nil, status.Errorf(codes.Unauthenticated, cons.MessageUnauthorized)
+	}
+
+	userId, _ := strconv.Atoi(id)
+
 	type EncodeUploadedVideo struct {
 		UploadId    string `json:"upload_id"`
 		Title       string `json:"title"`
@@ -58,7 +71,7 @@ func (u *uploadServer) UploadedWebhook(ctx context.Context, data *pb.UploadedWeb
 			Title:       data.Title,
 			Description: data.Description,
 			PublishedAt: time.Now().Format(time.RFC3339),
-			UserId:      1, //@TODO: send current user id
+			UserId:      userId,
 		},
 	})
 

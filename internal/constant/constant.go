@@ -28,4 +28,8 @@ const (
 	ProtocolAMQP = "amqp"
 )
 
+const (
+	HeaderUserId = "x-user-id"
+)
+
 const RawVideosDirectory = "raw-videos"
