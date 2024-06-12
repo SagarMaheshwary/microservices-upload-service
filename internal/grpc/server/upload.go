@@ -19,7 +19,7 @@ import (
 )
 
 type uploadServer struct {
-	pb.UploadServer
+	pb.UploadServiceServer
 }
 
 func (u *uploadServer) CreatePresignedUrl(ctx context.Context, data *pb.CreatePresignedUrlRequest) (*pb.CreatePresignedUrlResponse, error) {

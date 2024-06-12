@@ -26,7 +26,7 @@ func Connect() {
 
 	grpcServer := grpc.NewServer(opts...)
 
-	pb.RegisterUploadServer(grpcServer, &uploadServer{})
+	pb.RegisterUploadServiceServer(grpcServer, &uploadServer{})
 
 	log.Info("gRPC server started on %q", address)
 

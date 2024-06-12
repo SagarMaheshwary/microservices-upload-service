@@ -4,7 +4,7 @@ package upload;
 
 option go_package = "github.com/SagarMaheshwary/microservices-upload-service/proto/upload";
 
-service Upload {
+service UploadService {
   rpc CreatePresignedUrl(CreatePresignedUrlRequest) returns (CreatePresignedUrlResponse) {};
   rpc UploadedWebhook(UploadedWebhookRequest) returns (UploadedWebhookResponse) {};
 }

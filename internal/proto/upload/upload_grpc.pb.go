@@ -18,122 +18,122 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// UploadClient is the client API for Upload service.
+// UploadServiceClient is the client API for UploadService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type UploadClient interface {
+type UploadServiceClient interface {
 	CreatePresignedUrl(ctx context.Context, in *CreatePresignedUrlRequest, opts ...grpc.CallOption) (*CreatePresignedUrlResponse, error)
 	UploadedWebhook(ctx context.Context, in *UploadedWebhookRequest, opts ...grpc.CallOption) (*UploadedWebhookResponse, error)
 }
 
-type uploadClient struct {
+type uploadServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewUploadClient(cc grpc.ClientConnInterface) UploadClient {
-	return &uploadClient{cc}
+func NewUploadServiceClient(cc grpc.ClientConnInterface) UploadServiceClient {
+	return &uploadServiceClient{cc}
 }
 
-func (c *uploadClient) CreatePresignedUrl(ctx context.Context, in *CreatePresignedUrlRequest, opts ...grpc.CallOption) (*CreatePresignedUrlResponse, error) {
+func (c *uploadServiceClient) CreatePresignedUrl(ctx context.Context, in *CreatePresignedUrlRequest, opts ...grpc.CallOption) (*CreatePresignedUrlResponse, error) {
 	out := new(CreatePresignedUrlResponse)
-	err := c.cc.Invoke(ctx, "/upload.Upload/CreatePresignedUrl", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/upload.UploadService/CreatePresignedUrl", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *uploadClient) UploadedWebhook(ctx context.Context, in *UploadedWebhookRequest, opts ...grpc.CallOption) (*UploadedWebhookResponse, error) {
+func (c *uploadServiceClient) UploadedWebhook(ctx context.Context, in *UploadedWebhookRequest, opts ...grpc.CallOption) (*UploadedWebhookResponse, error) {
 	out := new(UploadedWebhookResponse)
-	err := c.cc.Invoke(ctx, "/upload.Upload/UploadedWebhook", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/upload.UploadService/UploadedWebhook", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// UploadServer is the server API for Upload service.
-// All implementations must embed UnimplementedUploadServer
+// UploadServiceServer is the server API for UploadService service.
+// All implementations must embed UnimplementedUploadServiceServer
 // for forward compatibility
-type UploadServer interface {
+type UploadServiceServer interface {
 	CreatePresignedUrl(context.Context, *CreatePresignedUrlRequest) (*CreatePresignedUrlResponse, error)
 	UploadedWebhook(context.Context, *UploadedWebhookRequest) (*UploadedWebhookResponse, error)
-	mustEmbedUnimplementedUploadServer()
+	mustEmbedUnimplementedUploadServiceServer()
 }
 
-// UnimplementedUploadServer must be embedded to have forward compatible implementations.
-type UnimplementedUploadServer struct {
+// UnimplementedUploadServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedUploadServiceServer struct {
 }
 
-func (UnimplementedUploadServer) CreatePresignedUrl(context.Context, *CreatePresignedUrlRequest) (*CreatePresignedUrlResponse, error) {
+func (UnimplementedUploadServiceServer) CreatePresignedUrl(context.Context, *CreatePresignedUrlRequest) (*CreatePresignedUrlResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePresignedUrl not implemented")
 }
-func (UnimplementedUploadServer) UploadedWebhook(context.Context, *UploadedWebhookRequest) (*UploadedWebhookResponse, error) {
+func (UnimplementedUploadServiceServer) UploadedWebhook(context.Context, *UploadedWebhookRequest) (*UploadedWebhookResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UploadedWebhook not implemented")
 }
-func (UnimplementedUploadServer) mustEmbedUnimplementedUploadServer() {}
+func (UnimplementedUploadServiceServer) mustEmbedUnimplementedUploadServiceServer() {}
 
-// UnsafeUploadServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to UploadServer will
+// UnsafeUploadServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to UploadServiceServer will
 // result in compilation errors.
-type UnsafeUploadServer interface {
-	mustEmbedUnimplementedUploadServer()
+type UnsafeUploadServiceServer interface {
+	mustEmbedUnimplementedUploadServiceServer()
 }
 
-func RegisterUploadServer(s grpc.ServiceRegistrar, srv UploadServer) {
-	s.RegisterService(&Upload_ServiceDesc, srv)
+func RegisterUploadServiceServer(s grpc.ServiceRegistrar, srv UploadServiceServer) {
+	s.RegisterService(&UploadService_ServiceDesc, srv)
 }
 
-func _Upload_CreatePresignedUrl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UploadService_CreatePresignedUrl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreatePresignedUrlRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UploadServer).CreatePresignedUrl(ctx, in)
+		return srv.(UploadServiceServer).CreatePresignedUrl(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/upload.Upload/CreatePresignedUrl",
+		FullMethod: "/upload.UploadService/CreatePresignedUrl",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UploadServer).CreatePresignedUrl(ctx, req.(*CreatePresignedUrlRequest))
+		return srv.(UploadServiceServer).CreatePresignedUrl(ctx, req.(*CreatePresignedUrlRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Upload_UploadedWebhook_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UploadService_UploadedWebhook_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UploadedWebhookRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UploadServer).UploadedWebhook(ctx, in)
+		return srv.(UploadServiceServer).UploadedWebhook(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/upload.Upload/UploadedWebhook",
+		FullMethod: "/upload.UploadService/UploadedWebhook",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UploadServer).UploadedWebhook(ctx, req.(*UploadedWebhookRequest))
+		return srv.(UploadServiceServer).UploadedWebhook(ctx, req.(*UploadedWebhookRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Upload_ServiceDesc is the grpc.ServiceDesc for Upload service.
+// UploadService_ServiceDesc is the grpc.ServiceDesc for UploadService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Upload_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "upload.Upload",
-	HandlerType: (*UploadServer)(nil),
+var UploadService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "upload.UploadService",
+	HandlerType: (*UploadServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "CreatePresignedUrl",
-			Handler:    _Upload_CreatePresignedUrl_Handler,
+			Handler:    _UploadService_CreatePresignedUrl_Handler,
 		},
 		{
 			MethodName: "UploadedWebhook",
-			Handler:    _Upload_UploadedWebhook_Handler,
+			Handler:    _UploadService_UploadedWebhook_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
