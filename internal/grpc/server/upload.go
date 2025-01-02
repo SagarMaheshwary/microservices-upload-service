@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	cons "github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
+	"github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/helper"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/aws"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/broker"
@@ -26,20 +26,20 @@ func (u *uploadServer) CreatePresignedUrl(ctx context.Context, data *pb.CreatePr
 	videoId := uuid.New().String()
 	thumbnailId := uuid.New().String()
 
-	videoUrl, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", cons.S3RawVideosDirectory, videoId))
+	videoUrl, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", constant.S3RawVideosDirectory, videoId))
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, cons.MessageInternalServerError)
+		return nil, status.Errorf(codes.Internal, constant.MessageInternalServerError)
 	}
 
-	thumbnailUrl, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", cons.S3ThumbnailsDirectory, thumbnailId))
+	thumbnailUrl, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", constant.S3ThumbnailsDirectory, thumbnailId))
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, cons.MessageInternalServerError)
+		return nil, status.Errorf(codes.Internal, constant.MessageInternalServerError)
 	}
 
 	response := &pb.CreatePresignedUrlResponse{
-		Message: cons.MessageOK,
+		Message: constant.MessageOK,
 		Data: &pb.CreatePresignedUrlResponseData{
 			VideoId:      videoId,
 			VideoUrl:     videoUrl,
@@ -54,10 +54,10 @@ func (u *uploadServer) CreatePresignedUrl(ctx context.Context, data *pb.CreatePr
 func (u *uploadServer) UploadedWebhook(ctx context.Context, data *pb.UploadedWebhookRequest) (*pb.UploadedWebhookResponse, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
 
-	id, exists := helper.GetFromMetadata(md, cons.HeaderUserId)
+	id, exists := helper.GetFromMetadata(md, constant.HeaderUserId)
 
 	if !exists {
-		return nil, status.Errorf(codes.Unauthenticated, cons.MessageUnauthorized)
+		return nil, status.Errorf(codes.Unauthenticated, constant.MessageUnauthorized)
 	}
 
 	userId, _ := strconv.Atoi(id)
@@ -71,8 +71,8 @@ func (u *uploadServer) UploadedWebhook(ctx context.Context, data *pb.UploadedWeb
 		UserId      int    `json:"user_id"`
 	}
 
-	err := publisher.P.Publish(cons.QueueEncodeService, &broker.MessageType{
-		Key: cons.MessageTypeEncodeUploadedVideo,
+	err := publisher.P.Publish(constant.QueueEncodeService, &broker.MessageType{
+		Key: constant.MessageTypeEncodeUploadedVideo,
 		Data: &EncodeUploadedVideo{
 			VideoId:     data.VideoId,
 			ThumbnailId: data.ThumbnailId,
@@ -84,11 +84,11 @@ func (u *uploadServer) UploadedWebhook(ctx context.Context, data *pb.UploadedWeb
 	})
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, cons.MessageInternalServerError)
+		return nil, status.Errorf(codes.Internal, constant.MessageInternalServerError)
 	}
 
 	response := &pb.UploadedWebhookResponse{
-		Message: cons.MessageOK,
+		Message: constant.MessageOK,
 		Data:    &pb.UploadedWebhookResponseData{},
 	}
 

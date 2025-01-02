@@ -12,7 +12,7 @@ import (
 )
 
 func NewSession() (*session.Session, error) {
-	c := config.GetS3()
+	c := config.Conf.AWS
 
 	s, err := session.NewSession(&awslib.Config{
 		Region:      awslib.String(c.Region),
@@ -29,7 +29,7 @@ func NewSession() (*session.Session, error) {
 }
 
 func CreatePresignedUploadUrl(key string) (string, error) {
-	c := config.GetS3()
+	c := config.Conf.AWS
 	sess, err := NewSession()
 
 	if err != nil {
@@ -39,11 +39,11 @@ func CreatePresignedUploadUrl(key string) (string, error) {
 	svc := s3.New(sess)
 
 	req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
-		Bucket: awslib.String(c.Bucket),
+		Bucket: awslib.String(c.S3Bucket),
 		Key:    awslib.String(key),
 	})
 
-	url, err := req.Presign(time.Duration(time.Duration(c.PresignedUrlExpiry) * time.Minute))
+	url, err := req.Presign(time.Duration(time.Duration(c.S3PresignedURLExpiry) * time.Minute))
 
 	if err != nil {
 		log.Error("Unable to create presigned upload url: %v", err)

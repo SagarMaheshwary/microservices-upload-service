@@ -5,18 +5,18 @@ import (
 	"net"
 
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/config"
-	cons "github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
+	"github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/log"
 	pb "github.com/sagarmaheshwary/microservices-upload-service/internal/proto/upload"
 	"google.golang.org/grpc"
 )
 
 func Connect() {
-	c := config.GetgrpcServer()
+	c := config.Conf.GRPCServer
 
 	address := fmt.Sprintf("%s:%d", c.Host, c.Port)
 
-	listener, err := net.Listen(cons.ProtocolTCP, address)
+	listener, err := net.Listen(constant.ProtocolTCP, address)
 
 	if err != nil {
 		log.Fatal("Failed to create tcp listner on %q: %v", address, err)

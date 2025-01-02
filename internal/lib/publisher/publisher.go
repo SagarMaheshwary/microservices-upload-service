@@ -6,7 +6,7 @@ import (
 
 	amqplib "github.com/rabbitmq/amqp091-go"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/config"
-	cons "github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
+	"github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/broker"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/log"
 )
@@ -18,7 +18,7 @@ type Publisher struct {
 }
 
 func (p *Publisher) Publish(queue string, message *broker.MessageType) error {
-	c := config.Getamqp()
+	c := config.Conf.AMQP
 	q, err := p.declareQueue(queue)
 
 	if err != nil {
@@ -43,7 +43,7 @@ func (p *Publisher) Publish(queue string, message *broker.MessageType) error {
 		false,
 		false,
 		amqplib.Publishing{
-			ContentType: cons.ContentTypeJSON,
+			ContentType: constant.ContentTypeJSON,
 			Body:        messageData,
 		},
 	)
