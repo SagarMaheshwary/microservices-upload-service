@@ -11,52 +11,55 @@ import (
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/helper"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/aws"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/broker"
+	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/publisher"
-	pb "github.com/sagarmaheshwary/microservices-upload-service/internal/proto/upload"
+	uploadpb "github.com/sagarmaheshwary/microservices-upload-service/internal/proto/upload"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
 type uploadServer struct {
-	pb.UploadServiceServer
+	uploadpb.UploadServiceServer
 }
 
-func (u *uploadServer) CreatePresignedUrl(ctx context.Context, data *pb.CreatePresignedUrlRequest) (*pb.CreatePresignedUrlResponse, error) {
-	videoId := uuid.New().String()
-	thumbnailId := uuid.New().String()
+func (u *uploadServer) CreatePresignedUrl(ctx context.Context, data *uploadpb.CreatePresignedUrlRequest) (*uploadpb.CreatePresignedUrlResponse, error) {
+	videoID := uuid.New().String()
+	thumbnailID := uuid.New().String()
 
-	videoUrl, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", constant.S3RawVideosDirectory, videoId))
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, constant.MessageInternalServerError)
-	}
-
-	thumbnailUrl, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", constant.S3ThumbnailsDirectory, thumbnailId))
+	videoUrl, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", constant.S3RawVideosDirectory, videoID))
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, constant.MessageInternalServerError)
 	}
 
-	response := &pb.CreatePresignedUrlResponse{
+	thumbnailURL, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", constant.S3ThumbnailsDirectory, thumbnailID))
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, constant.MessageInternalServerError)
+	}
+
+	response := &uploadpb.CreatePresignedUrlResponse{
 		Message: constant.MessageOK,
-		Data: &pb.CreatePresignedUrlResponseData{
-			VideoId:      videoId,
+		Data: &uploadpb.CreatePresignedUrlResponseData{
+			VideoId:      videoID,
 			VideoUrl:     videoUrl,
-			ThumbnailId:  thumbnailId,
-			ThumbnailUrl: thumbnailUrl,
+			ThumbnailId:  thumbnailID,
+			ThumbnailUrl: thumbnailURL,
 		},
 	}
 
 	return response, nil
 }
 
-func (u *uploadServer) UploadedWebhook(ctx context.Context, data *pb.UploadedWebhookRequest) (*pb.UploadedWebhookResponse, error) {
+func (u *uploadServer) UploadedWebhook(ctx context.Context, data *uploadpb.UploadedWebhookRequest) (*uploadpb.UploadedWebhookResponse, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
 
-	id, exists := helper.GetFromMetadata(md, constant.HeaderUserId)
+	id, exists := helper.GetGRPCMetadataValue(md, constant.HeaderUserID)
 
 	if !exists {
+		logger.Error("Unable to retreive grpc metadata: %s", constant.HeaderUserID)
+
 		return nil, status.Errorf(codes.Unauthenticated, constant.MessageUnauthorized)
 	}
 
@@ -87,9 +90,9 @@ func (u *uploadServer) UploadedWebhook(ctx context.Context, data *pb.UploadedWeb
 		return nil, status.Errorf(codes.Internal, constant.MessageInternalServerError)
 	}
 
-	response := &pb.UploadedWebhookResponse{
+	response := &uploadpb.UploadedWebhookResponse{
 		Message: constant.MessageOK,
-		Data:    &pb.UploadedWebhookResponseData{},
+		Data:    &uploadpb.UploadedWebhookResponseData{},
 	}
 
 	return response, nil

@@ -6,9 +6,10 @@ import (
 
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/config"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
-	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/log"
-	pb "github.com/sagarmaheshwary/microservices-upload-service/internal/proto/upload"
+	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
+	uploadpb "github.com/sagarmaheshwary/microservices-upload-service/internal/proto/upload"
 	"google.golang.org/grpc"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 func Connect() {
@@ -19,18 +20,19 @@ func Connect() {
 	listener, err := net.Listen(constant.ProtocolTCP, address)
 
 	if err != nil {
-		log.Fatal("Failed to create tcp listner on %q: %v", address, err)
+		logger.Fatal("Failed to create tcp listner on %q: %v", address, err)
 	}
 
-	var opts []grpc.ServerOption
+	var options []grpc.ServerOption
 
-	grpcServer := grpc.NewServer(opts...)
+	server := grpc.NewServer(options...)
 
-	pb.RegisterUploadServiceServer(grpcServer, &uploadServer{})
+	uploadpb.RegisterUploadServiceServer(server, &uploadServer{})
+	healthpb.RegisterHealthServer(server, &healthServer{})
 
-	log.Info("gRPC server started on %q", address)
+	logger.Info("gRPC server started on %q", address)
 
-	if err := grpcServer.Serve(listener); err != nil {
-		log.Error("gRPC server failed to start %v", err)
+	if err := server.Serve(listener); err != nil {
+		logger.Error("gRPC server failed to start %v", err)
 	}
 }

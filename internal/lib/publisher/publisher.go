@@ -8,7 +8,7 @@ import (
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/config"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/broker"
-	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/log"
+	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
 )
 
 var P *Publisher
@@ -31,7 +31,7 @@ func (p *Publisher) Publish(queue string, message *broker.MessageType) error {
 	messageData, err := json.Marshal(&message)
 
 	if err != nil {
-		log.Error("Unable to parse message %v", message)
+		logger.Error("Unable to parse message! %v", err)
 
 		return err
 	}
@@ -49,12 +49,12 @@ func (p *Publisher) Publish(queue string, message *broker.MessageType) error {
 	)
 
 	if err != nil {
-		log.Error("Unable to publish message %v", err)
+		logger.Error("Unable to publish message! %v", err)
 
 		return err
 	}
 
-	log.Info("Message %q Sent", message.Key)
+	logger.Info("Message %q Sent: %v", message.Key, message.Data)
 
 	return nil
 }
@@ -70,7 +70,7 @@ func (p *Publisher) declareQueue(queue string) (*amqplib.Queue, error) {
 	)
 
 	if err != nil {
-		log.Error("Declare queue error %v", err)
+		logger.Error("Declare queue error %v", err)
 
 		return nil, err
 	}

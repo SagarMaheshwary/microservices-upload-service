@@ -6,7 +6,7 @@ import (
 	amqplib "github.com/rabbitmq/amqp091-go"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/config"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
-	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/log"
+	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
 )
 
 var Conn *amqplib.Connection
@@ -26,20 +26,30 @@ func Connect() {
 	Conn, err = amqplib.Dial(address)
 
 	if err != nil {
-		log.Fatal("Broker connection error %v", err)
+		logger.Fatal("Broker connection error %v", err)
 	}
 
-	log.Info("Broker connected on %q", address)
+	logger.Info("Broker connected on %q", address)
 }
 
 func NewChannel() (*amqplib.Channel, error) {
 	c, err := Conn.Channel()
 
 	if err != nil {
-		log.Error("Broker channel error %v", err)
+		logger.Error("Broker channel error %v", err)
 
 		return nil, err
 	}
 
 	return c, nil
+}
+
+func HealthCheck() bool {
+	if Conn == nil || Conn.IsClosed() {
+		logger.Info("AMQP health check failed!")
+
+		return false
+	}
+
+	return true
 }

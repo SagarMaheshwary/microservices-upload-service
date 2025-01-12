@@ -29,7 +29,7 @@ const (
 )
 
 const (
-	HeaderUserId = "x-user-id"
+	HeaderUserID = "x-user-id"
 )
 
 const (
