@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 
+	encoderpc "github.com/sagarmaheshwary/microservices-upload-service/internal/grpc/client/encode"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/broker"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
@@ -24,6 +25,10 @@ func (h *healthServer) Check(ctx context.Context, req *healthpb.HealthCheckReque
 
 func getServicesHealthStatus() healthpb.HealthCheckResponse_ServingStatus {
 	if !broker.HealthCheck() {
+		return healthpb.HealthCheckResponse_NOT_SERVING
+	}
+
+	if !encoderpc.HealthCheck() {
 		return healthpb.HealthCheckResponse_NOT_SERVING
 	}
 

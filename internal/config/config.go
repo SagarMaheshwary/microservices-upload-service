@@ -17,6 +17,7 @@ type Config struct {
 	GRPCServer *GRPCServer
 	AWS        *AWS
 	AMQP       *AMQP
+	GRPCClient *GRPCClient
 }
 
 type GRPCServer struct {
@@ -38,6 +39,11 @@ type AMQP struct {
 	Username       string
 	Password       string
 	PublishTimeout time.Duration
+}
+
+type GRPCClient struct {
+	EncodeServiceURL string
+	Timeout          time.Duration
 }
 
 func Init() {
@@ -67,6 +73,10 @@ func Init() {
 			Username:       getEnv("AMQP_USERNAME", "guest"),
 			Password:       getEnv("AMQP_PASSWORD", "guest"),
 			PublishTimeout: getEnvDuration("AMQP_PUBLISH_TIMEOUT_SECONDS", 5),
+		},
+		GRPCClient: &GRPCClient{
+			EncodeServiceURL: getEnv("GRPC_ENCODE_SERVICE_URL", "localhost:5004"),
+			Timeout:          getEnvDuration("GRPC_CLIENT_TIMEOUT_SECONDS", 5),
 		},
 	}
 }
