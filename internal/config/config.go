@@ -18,6 +18,7 @@ type Config struct {
 	AWS        *AWS
 	AMQP       *AMQP
 	GRPCClient *GRPCClient
+	Prometheus *Prometheus
 }
 
 type GRPCServer struct {
@@ -44,6 +45,11 @@ type AMQP struct {
 type GRPCClient struct {
 	EncodeServiceURL string
 	Timeout          time.Duration
+}
+
+type Prometheus struct {
+	METRICS_HOST string
+	METRICS_PORT int
 }
 
 func Init() {
@@ -77,6 +83,10 @@ func Init() {
 		GRPCClient: &GRPCClient{
 			EncodeServiceURL: getEnv("GRPC_ENCODE_SERVICE_URL", "localhost:5004"),
 			Timeout:          getEnvDuration("GRPC_CLIENT_TIMEOUT_SECONDS", 5),
+		},
+		Prometheus: &Prometheus{
+			METRICS_HOST: getEnv("PROMETHEUS_METRICS_HOST", "localhost"),
+			METRICS_PORT: getEnvInt("PROMETHEUS_METRICS_PORT", 5012),
 		},
 	}
 }

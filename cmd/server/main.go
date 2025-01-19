@@ -6,6 +6,7 @@ import (
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/grpc/server"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/broker"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
+	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/prometheus"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/publisher"
 )
 
@@ -25,5 +26,10 @@ func main() {
 	publisher.Init(publishChan)
 
 	encoderpc.Connect()
+
+	go func() {
+		prometheus.Connect()
+	}()
+
 	server.Connect()
 }
