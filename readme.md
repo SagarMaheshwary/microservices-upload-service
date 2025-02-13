@@ -1,33 +1,40 @@
 # MICROSERVICES - UPLOAD SERVICE
 
-This service is a part of the Microservices project built for handling video uploads.
+Upload Service for the [Microservices](https://github.com/SagarMaheshwary/microservices) project.
 
-### TECHNOLOGIES
+### OVERVIEW
 
-- Golang (1.22.2)
-- gRPC
-- RabbitMQ
-- Amazon S3
+- Golang
+- ZeroLog
+- gRPC – Serves as the main server for service communication
+- RabbitMQ - Enables asynchronous communication with the [encode service](https://github.com/SagarMaheshwary/microservices-encode-service)
+- Amazon S3 - Handles generating signed urls from s3 for video uploads that are later processed by encode service
+- Prometheus Client – Exports default and custom metrics for Prometheus server monitoring
 
 ### SETUP
 
-cd into the project directory and copy **.env.example** to **.env** and update the required variables.
+Follow the instructions in the [README](https://github.com/SagarMaheshwary/microservices?tab=readme-ov-file#setup) of the main microservices repository to run this service along with others using Docker Compose.
 
-Create executable and start the server:
+### APIs (gRPC)
 
-```bash
-go build cmd/server/main.go && ./main
-```
+Proto files are located in the **internal/proto** directory.
 
-Or install "[air](https://github.com/cosmtrek/air)" and run it to autoreload when making file changes:
+| SERVICE       | RPC                | BODY                                                                                                                                                                                                               | METADATA | DESCRIPTION                                                       |
+| ------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------- |
+| UploadService | CreatePresignedUrl | -                                                                                                                                                                                                                  | -        | Generates a presigned url that can be used to upload videos to s3 |
+| UploadService | UploadedWebhook    | {"video_id": "string - s3 upload id from presigned-url process", "thumbnail_id": "string - s3 upload id from presigned-url process", "title": "string - video title", "description": "string - video description"} | -        | Send video data to encode service via rabbitmq for video encoding |
+| Health        | Check              | -                                                                                                                                                                                                                  | -        | Service health check                                              |
 
-```bash
-air -c .air-toml
-```
+### APIs (REST)
 
-### APIs (RPC)
+| API      | METHOD | BODY | Headers | Description                 |
+| -------- | ------ | ---- | ------- | --------------------------- |
+| /metrics | GET    | -    | -       | Prometheus metrics endpoint |
 
-| SERVICE       | RPC                | METADATA | DESCRIPTION                                                                                                                                       |
-| ------------- | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| UploadService | CreatePresignedUrl | -        | Generates a presigned url that can be used to upload videos to s3.                                                                                |
-| UploadService | UploadedWebhook    | -        | Once the video is uploaded via the presigned url, we will inform "encode" service by this RPC to start encoding the uploaded video for streaming. |
+### RABBITMQ MESSAGES
+
+#### Sent Messages (Published to the Queue)
+
+| MESSAGE NAME        | SENT TO                                                                           | DESCRIPTION                                                          |
+| ------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| EncodeUploadedVideo | [Encode Service](https://github.com/SagarMaheshwary/microservices-encode-service) | Notifies the Encode service that a new video is ready for processing |
