@@ -11,6 +11,8 @@ import (
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/prometheus"
 	uploadpb "github.com/sagarmaheshwary/microservices-upload-service/internal/proto/upload"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/status"
@@ -27,7 +29,13 @@ func Connect() {
 		logger.Fatal("Failed to create tcp listner on %q: %v", address, err)
 	}
 
-	server := grpc.NewServer(grpc.UnaryInterceptor(prometheusUnaryInterceptor))
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(prometheusUnaryInterceptor),
+		grpc.StatsHandler(otelgrpc.NewServerHandler(
+			otelgrpc.WithTracerProvider(otel.GetTracerProvider()),
+			otelgrpc.WithPropagators(otel.GetTextMapPropagator()),
+		)),
+	)
 
 	uploadpb.RegisterUploadServiceServer(server, &uploadServer{})
 	healthpb.RegisterHealthServer(server, &healthServer{})

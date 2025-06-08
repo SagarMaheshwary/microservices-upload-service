@@ -54,7 +54,6 @@ func (u *uploadServer) CreatePresignedUrl(ctx context.Context, data *uploadpb.Cr
 
 func (u *uploadServer) UploadedWebhook(ctx context.Context, data *uploadpb.UploadedWebhookRequest) (*uploadpb.UploadedWebhookResponse, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
-
 	id, exists := helper.GetGRPCMetadataValue(md, constant.HeaderUserID)
 
 	if !exists {
@@ -74,7 +73,7 @@ func (u *uploadServer) UploadedWebhook(ctx context.Context, data *uploadpb.Uploa
 		UserId      int    `json:"user_id"`
 	}
 
-	err := publisher.P.Publish(constant.QueueEncodeService, &broker.MessageType{
+	err := publisher.P.Publish(ctx, constant.QueueEncodeService, &broker.MessageType{
 		Key: constant.MessageTypeEncodeUploadedVideo,
 		Data: &EncodeUploadedVideo{
 			VideoId:     data.VideoId,

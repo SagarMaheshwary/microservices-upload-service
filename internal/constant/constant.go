@@ -36,3 +36,7 @@ const (
 	S3RawVideosDirectory  = "raw-videos"
 	S3ThumbnailsDirectory = "thumbnails"
 )
+
+const ServiceName = "Upload Service"
+
+const TraceTypeRabbitMQPublish = "RabbitMQ Publish"

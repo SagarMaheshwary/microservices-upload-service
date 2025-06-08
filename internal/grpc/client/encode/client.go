@@ -5,19 +5,28 @@ import (
 
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/config"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-func Connect() {
-	var options []grpc.DialOption
+func Connect(ctx context.Context) {
+	var opts []grpc.DialOption
 
-	options = append(options, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	opts = append(
+		opts,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler(
+			otelgrpc.WithTracerProvider(otel.GetTracerProvider()),
+			otelgrpc.WithPropagators(otel.GetTextMapPropagator()),
+		)),
+	)
 
 	address := config.Conf.GRPCClient.EncodeServiceURL
 
-	connection, err := grpc.Dial(address, options...)
+	connection, err := grpc.Dial(address, opts...)
 
 	if err != nil {
 		logger.Error("User gRPC failed to connect on %q: %v", address, err)
@@ -29,13 +38,13 @@ func Connect() {
 		health: healthpb.NewHealthClient(connection),
 	}
 
-	if HealthCheck() {
+	if HealthCheck(ctx) {
 		logger.Info("User gRPC client connected on %q", address)
 	}
 }
 
-func HealthCheck() bool {
-	ctx, cancel := context.WithTimeout(context.Background(), config.Conf.GRPCClient.Timeout)
+func HealthCheck(ctx context.Context) bool {
+	ctx, cancel := context.WithTimeout(ctx, config.Conf.GRPCClient.Timeout)
 	defer cancel()
 
 	response, err := User.health.Check(ctx, &healthpb.HealthCheckRequest{})
