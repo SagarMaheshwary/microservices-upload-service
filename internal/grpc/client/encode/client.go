@@ -29,17 +29,17 @@ func Connect(ctx context.Context) {
 	connection, err := grpc.Dial(address, opts...)
 
 	if err != nil {
-		logger.Error("User gRPC failed to connect on %q: %v", address, err)
+		logger.Error("Encode gRPC failed to connect on %q: %v", address, err)
 
 		return
 	}
 
-	User = &encodeClient{
+	Encode = &encodeClient{
 		health: healthpb.NewHealthClient(connection),
 	}
 
 	if HealthCheck(ctx) {
-		logger.Info("User gRPC client connected on %q", address)
+		logger.Info("Encode gRPC client connected on %q", address)
 	}
 }
 
@@ -47,16 +47,16 @@ func HealthCheck(ctx context.Context) bool {
 	ctx, cancel := context.WithTimeout(ctx, config.Conf.GRPCClient.Timeout)
 	defer cancel()
 
-	response, err := User.health.Check(ctx, &healthpb.HealthCheckRequest{})
+	response, err := Encode.health.Check(ctx, &healthpb.HealthCheckRequest{})
 
 	if err != nil {
-		logger.Error("User gRPC health check failed! %v", err)
+		logger.Error("Encode gRPC health check failed! %v", err)
 
 		return false
 	}
 
 	if response.Status == healthpb.HealthCheckResponse_NOT_SERVING {
-		logger.Error("User gRPC health check failed!")
+		logger.Error("Encode gRPC health check failed!")
 
 		return false
 	}
