@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
-	"log"
+	"os"
+	"os/signal"
+	"time"
 
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/config"
 	encoderpc "github.com/sagarmaheshwary/microservices-upload-service/internal/grpc/client/encode"
@@ -11,38 +13,44 @@ import (
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/jaeger"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/prometheus"
-	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/publisher"
 )
 
 func main() {
 	logger.Init()
 	config.Init()
 
-	ctx := context.Background()
-	shutdown := jaeger.Init(ctx)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
 
-	defer func() {
-		if err := shutdown(ctx); err != nil {
-			log.Fatalf("failed to shutdown jaeger tracer: %v", err)
-		}
-	}()
+	shutdownJaeger := jaeger.Init(ctx)
 
-	go func() {
-		prometheus.Connect()
-	}()
+	promServer := prometheus.NewServer()
+	go prometheus.Serve(promServer)
 
-	broker.Connect()
-	defer broker.Conn.Close()
+	go broker.MaintainConnection(ctx)
 
-	publishChan, err := broker.NewChannel()
+	encoderpc.NewClient(ctx)
 
-	if err != nil {
-		logger.Fatal("Unable to create publish channel %v", err)
+	grpcServer := server.NewServer()
+	go server.Serve(grpcServer)
+
+	<-ctx.Done()
+
+	logger.Info("Shutdown signal received")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Second*5))
+	defer cancel()
+	if err := shutdownJaeger(shutdownCtx); err != nil {
+		logger.Warn("jaeger server shutdown error: %v", err)
 	}
 
-	publisher.Init(publishChan)
+	shutdownCtx, cancel = context.WithTimeout(context.Background(), time.Duration(time.Second*5))
+	defer cancel()
+	if err := promServer.Shutdown(shutdownCtx); err != nil {
+		logger.Warn("Prometheus server shutdown error: %v", err)
+	}
 
-	encoderpc.Connect(ctx)
+	grpcServer.GracefulStop()
 
-	server.Connect()
+	logger.Info("Shutdown complete")
 }

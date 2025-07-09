@@ -10,7 +10,6 @@ import (
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/helper"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/aws"
-	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/broker"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/publisher"
 	uploadpb "github.com/sagarmaheshwary/microservices-upload-service/internal/proto/upload"
@@ -73,7 +72,7 @@ func (u *uploadServer) UploadedWebhook(ctx context.Context, data *uploadpb.Uploa
 		UserId      int    `json:"user_id"`
 	}
 
-	err := publisher.P.Publish(ctx, constant.QueueEncodeService, &broker.MessageType{
+	err := publisher.P.Publish(ctx, constant.QueueEncodeService, &publisher.MessageType{
 		Key: constant.MessageTypeEncodeUploadedVideo,
 		Data: &EncodeUploadedVideo{
 			VideoId:     data.VideoId,

@@ -12,7 +12,7 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-func Connect(ctx context.Context) {
+func NewClient(ctx context.Context) {
 	var opts []grpc.DialOption
 
 	opts = append(
@@ -26,7 +26,7 @@ func Connect(ctx context.Context) {
 
 	address := config.Conf.GRPCClient.EncodeServiceURL
 
-	connection, err := grpc.Dial(address, opts...)
+	connection, err := grpc.NewClient(address, opts...)
 
 	if err != nil {
 		logger.Error("Encode gRPC failed to connect on %q: %v", address, err)
