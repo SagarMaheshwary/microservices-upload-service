@@ -40,25 +40,17 @@ func (p *Publisher) Publish(ctx context.Context, queue string, message *MessageT
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, c.PublishTimeout) // use passed-in context
+	ctx, cancel := context.WithTimeout(ctx, c.PublishTimeoutSeconds)
 	defer cancel()
 
 	messageData, err := json.Marshal(&message)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "failed to marshal message")
-		logger.Error("Unable to parse message %v", message)
 		return err
 	}
 
-	// Inject trace context into headers
-	headers := amqplib.Table{}
-	carrier := propagation.MapCarrier{}
-	otel.GetTextMapPropagator().Inject(ctx, carrier)
-	for k, v := range carrier {
-		headers[k] = v
-	}
-
+	headers := headersWithTraceContext(ctx)
 	err = p.channel.PublishWithContext(
 		ctx,
 		"",
@@ -74,7 +66,6 @@ func (p *Publisher) Publish(ctx context.Context, queue string, message *MessageT
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "failed to publish message")
-		logger.Error("AMQP Unable to publish message %v", err)
 		return err
 	}
 
@@ -96,7 +87,6 @@ func (p *Publisher) declareQueue(queue string) (*amqplib.Queue, error) {
 
 	if err != nil {
 		logger.Error("Declare queue error %v", err)
-
 		return nil, err
 	}
 
@@ -105,4 +95,16 @@ func (p *Publisher) declareQueue(queue string) (*amqplib.Queue, error) {
 
 func Init(channel *amqplib.Channel) {
 	P = &Publisher{channel: channel}
+}
+
+func headersWithTraceContext(ctx context.Context) amqplib.Table {
+	headers := amqplib.Table{}
+	carrier := propagation.MapCarrier{}
+
+	otel.GetTextMapPropagator().Inject(ctx, carrier)
+	for k, v := range carrier {
+		headers[k] = v
+	}
+
+	return headers
 }

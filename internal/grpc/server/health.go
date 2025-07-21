@@ -37,7 +37,7 @@ func getServicesHealthStatus(ctx context.Context) healthpb.HealthCheckResponse_S
 		return healthpb.HealthCheckResponse_NOT_SERVING
 	}
 
-	if !encoderpc.HealthCheck(ctx) {
+	if err := encoderpc.HealthCheck(ctx); err != nil {
 		return healthpb.HealthCheckResponse_NOT_SERVING
 	}
 

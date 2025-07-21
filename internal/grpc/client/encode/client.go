@@ -2,6 +2,7 @@ package encode
 
 import (
 	"context"
+	"errors"
 
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/config"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
@@ -12,7 +13,7 @@ import (
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
-func NewClient(ctx context.Context) {
+func NewClient(ctx context.Context) error {
 	var opts []grpc.DialOption
 
 	opts = append(
@@ -23,43 +24,41 @@ func NewClient(ctx context.Context) {
 			otelgrpc.WithPropagators(otel.GetTextMapPropagator()),
 		)),
 	)
-
 	address := config.Conf.GRPCClient.EncodeServiceURL
 
 	connection, err := grpc.NewClient(address, opts...)
-
 	if err != nil {
 		logger.Error("Encode gRPC failed to connect on %q: %v", address, err)
-
-		return
+		return err
 	}
 
 	Encode = &encodeClient{
 		health: healthpb.NewHealthClient(connection),
 	}
 
-	if HealthCheck(ctx) {
-		logger.Info("Encode gRPC client connected on %q", address)
+	if err := HealthCheck(ctx); err != nil {
+		return err
 	}
+
+	logger.Info("Encode gRPC client connected on %q", address)
+
+	return nil
 }
 
-func HealthCheck(ctx context.Context) bool {
-	ctx, cancel := context.WithTimeout(ctx, config.Conf.GRPCClient.Timeout)
+func HealthCheck(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, config.Conf.GRPCClient.TimeoutSeconds)
 	defer cancel()
 
 	response, err := Encode.health.Check(ctx, &healthpb.HealthCheckRequest{})
-
 	if err != nil {
 		logger.Error("Encode gRPC health check failed! %v", err)
-
-		return false
+		return err
 	}
 
 	if response.Status == healthpb.HealthCheckResponse_NOT_SERVING {
 		logger.Error("Encode gRPC health check failed!")
-
-		return false
+		return errors.New("Encode gRPC health check failed")
 	}
 
-	return true
+	return nil
 }

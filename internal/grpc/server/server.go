@@ -8,6 +8,7 @@ import (
 
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/config"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
+	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/aws"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/prometheus"
 	uploadpb "github.com/sagarmaheshwary/microservices-upload-service/internal/proto/upload"
@@ -27,28 +28,32 @@ func NewServer() *grpc.Server {
 		)),
 	)
 
-	uploadpb.RegisterUploadServiceServer(server, &uploadServer{})
+	uploadpb.RegisterUploadServiceServer(server, &uploadServer{
+		s3Storage: aws.NewS3Service(),
+	})
 	healthpb.RegisterHealthServer(server, &healthServer{})
 
 	return server
 }
 
-func Serve(server *grpc.Server) {
+func Serve(server *grpc.Server) error {
 	c := config.Conf.GRPCServer
-
 	address := fmt.Sprintf("%s:%d", c.Host, c.Port)
 
 	listener, err := net.Listen(constant.ProtocolTCP, address)
-
 	if err != nil {
 		logger.Fatal("Failed to create tcp listner on %q: %v", address, err)
+		return err
 	}
 
 	logger.Info("gRPC server started on %q", address)
 
 	if err := server.Serve(listener); err != nil {
 		logger.Error("gRPC server failed to start %v", err)
+		return err
 	}
+
+	return nil
 }
 
 func prometheusUnaryInterceptor(

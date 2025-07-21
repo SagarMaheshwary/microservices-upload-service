@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"os"
 	"os/signal"
 	"time"
@@ -13,6 +15,7 @@ import (
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/jaeger"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/prometheus"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -25,14 +28,22 @@ func main() {
 	shutdownJaeger := jaeger.Init(ctx)
 
 	promServer := prometheus.NewServer()
-	go prometheus.Serve(promServer)
+	go func() {
+		if err := prometheus.Serve(promServer); err != nil && err != http.ErrServerClosed {
+			stop()
+		}
+	}()
 
 	go broker.MaintainConnection(ctx)
 
 	encoderpc.NewClient(ctx)
 
 	grpcServer := server.NewServer()
-	go server.Serve(grpcServer)
+	go func() {
+		if err := server.Serve(grpcServer); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+			stop()
+		}
+	}()
 
 	<-ctx.Done()
 

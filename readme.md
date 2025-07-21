@@ -10,10 +10,11 @@ Upload Service for the [Microservices](https://github.com/SagarMaheshwary/micros
 - RabbitMQ - Enables asynchronous communication with the [encode service](https://github.com/SagarMaheshwary/microservices-encode-service)
 - Amazon S3 - Handles generating signed urls from s3 for video uploads that are later processed by encode service
 - Prometheus Client – Exports default and custom metrics for Prometheus server monitoring
+- Jaeger – Distributed request tracing
 
 ### SETUP
 
-Follow the instructions in the [README](https://github.com/SagarMaheshwary/microservices?tab=readme-ov-file#setup) of the main microservices repository to run this service along with others using Docker Compose.
+Follow the instructions in the [README](https://github.com/SagarMaheshwary/microservices?tab=readme-ov-file#setup) of the main microservices repository to run this service along with others using Docker Compose or Kubernetes (KIND).
 
 ### APIs (gRPC)
 

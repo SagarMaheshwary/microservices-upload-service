@@ -10,7 +10,6 @@ import (
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/constant"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/helper"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/aws"
-	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/logger"
 	"github.com/sagarmaheshwary/microservices-upload-service/internal/lib/publisher"
 	uploadpb "github.com/sagarmaheshwary/microservices-upload-service/internal/proto/upload"
 	"google.golang.org/grpc/codes"
@@ -20,20 +19,28 @@ import (
 
 type uploadServer struct {
 	uploadpb.UploadServiceServer
+	s3Storage aws.S3Storage
+}
+
+type EncodeUploadedVideo struct {
+	VideoId     string `json:"video_id"`
+	ThumbnailId string `json:"thumbnail_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	PublishedAt string `json:"published_at"`
+	UserId      int    `json:"user_id"`
 }
 
 func (u *uploadServer) CreatePresignedUrl(ctx context.Context, data *uploadpb.CreatePresignedUrlRequest) (*uploadpb.CreatePresignedUrlResponse, error) {
 	videoID := uuid.New().String()
 	thumbnailID := uuid.New().String()
 
-	videoUrl, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", constant.S3RawVideosDirectory, videoID))
-
+	videoURL, err := u.s3Storage.CreatePresignedUploadURL(fmt.Sprintf("%s/%s", constant.S3RawVideosDirectory, videoID))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, constant.MessageInternalServerError)
 	}
 
-	thumbnailURL, err := aws.CreatePresignedUploadUrl(fmt.Sprintf("%s/%s", constant.S3ThumbnailsDirectory, thumbnailID))
-
+	thumbnailURL, err := u.s3Storage.CreatePresignedUploadURL(fmt.Sprintf("%s/%s", constant.S3ThumbnailsDirectory, thumbnailID))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, constant.MessageInternalServerError)
 	}
@@ -42,36 +49,22 @@ func (u *uploadServer) CreatePresignedUrl(ctx context.Context, data *uploadpb.Cr
 		Message: constant.MessageOK,
 		Data: &uploadpb.CreatePresignedUrlResponseData{
 			VideoId:      videoID,
-			VideoUrl:     videoUrl,
+			VideoUrl:     videoURL,
 			ThumbnailId:  thumbnailID,
 			ThumbnailUrl: thumbnailURL,
 		},
 	}
-
 	return response, nil
 }
 
 func (u *uploadServer) UploadedWebhook(ctx context.Context, data *uploadpb.UploadedWebhookRequest) (*uploadpb.UploadedWebhookResponse, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
 	id, exists := helper.GetGRPCMetadataValue(md, constant.HeaderUserID)
-
 	if !exists {
-		logger.Error("Unable to retreive grpc metadata: %s", constant.HeaderUserID)
-
 		return nil, status.Errorf(codes.Unauthenticated, constant.MessageUnauthorized)
 	}
 
 	userId, _ := strconv.Atoi(id)
-
-	type EncodeUploadedVideo struct {
-		VideoId     string `json:"video_id"`
-		ThumbnailId string `json:"thumbnail_id"`
-		Title       string `json:"title"`
-		Description string `json:"description"`
-		PublishedAt string `json:"published_at"`
-		UserId      int    `json:"user_id"`
-	}
-
 	err := publisher.P.Publish(ctx, constant.QueueEncodeService, &publisher.MessageType{
 		Key: constant.MessageTypeEncodeUploadedVideo,
 		Data: &EncodeUploadedVideo{
@@ -83,7 +76,6 @@ func (u *uploadServer) UploadedWebhook(ctx context.Context, data *uploadpb.Uploa
 			UserId:      userId,
 		},
 	})
-
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, constant.MessageInternalServerError)
 	}
@@ -92,6 +84,5 @@ func (u *uploadServer) UploadedWebhook(ctx context.Context, data *uploadpb.Uploa
 		Message: constant.MessageOK,
 		Data:    &uploadpb.UploadedWebhookResponseData{},
 	}
-
 	return response, nil
 }
